@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Verification</title>
+    <style>
+        /* Animated Background */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #5967a3, #745b8c, #76728d, #806f9b);
+            background-size: 300% 300%;
+            animation: gradientAnimation 8s ease infinite;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Navigation Bar */
+        nav {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-icon {
+            font-size: 18px;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 180px;
+            text-align: center;
+        }
+
+        .profile-icon:hover + .dropdown-content,
+        .dropdown-content:hover {
+            display: block;
+        }
+
+        .logout-btn {
+            display: inline-block;
+            background: #ff4b5c;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: 0.3s ease-in-out;
+        }
+
+        .logout-btn:hover {
+            background: #ff1f3a;
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            font-weight: bold;
+        }
+
+        /* Form Styling */
+        form {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            margin-top: 100px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+
+        input[type="submit"] {
+            background: linear-gradient(to right, #28a745, #28d745);
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        input[type="submit"]:hover {
+            transform: scale(1.05);
+            background: linear-gradient(to right, #1e8f3a, #1ecf3a);
+        }
+
+        /* Result Styling */
+        h3 {
+            color: white;
+            margin-top: 10px;
+        }
+
+        h3 span {
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <a class="logo" href="#">Face Verification</a>
+        <div class="profile-info">
+            <div>
+                <a href="#" class="profile-icon">Profile</a>
+                <div class="dropdown-content">
+                    <p>Welcome, {{ username }}</p>
+                    <a href="/logout" class="logout-btn">Logout</a>
+                </div>
+            </div>
+        </div>        
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <h2 style="color: white;">Upload Images for Verification</h2>
+        
+        <label for="fake_image">Upload Fake Image:</label>
+        <input type="file" name="fake_image" required>
+    
+        <label for="original_image">Upload Original Image:</label>
+        <input type="file" name="original_image" required>
+    
+        <h3>Result:
+            {% if status %} 
+                <span style="color: lightgreen">{{ status }}</span> 
+            {% elif err %}
+                <span style="color: red">{{ err }}</span>
+            {% else %}
+                <span style="color: lightblue">Awaiting Results</span>
+            {% endif %}
+        </h3>
+    
+        <h3 style="color: red;">{{ error }}</h3>
+    
+        <input type="submit" value="Verify Images">
+    </form>        
+
+    <script>
+        // Show flash messages for 3 seconds
+        document.addEventListener("DOMContentLoaded", function () {
+            const flashMessages = document.querySelector(".flash-messages");
+            if (flashMessages) {
+                flashMessages.style.display = "block";
+                setTimeout(() => {
+                    flashMessages.style.display = "none";
+                }, 3000);
+            }
+        });
+    </script>
+
+</body>
+</html>
