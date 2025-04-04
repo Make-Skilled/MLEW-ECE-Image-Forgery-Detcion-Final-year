@@ -22,7 +22,27 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
 
         /* Navigation Bar */
@@ -109,62 +129,485 @@
 
         /* Form Styling */
         form {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             padding: 30px;
             margin-top: 100px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 400px;
+            margin-bottom: 50px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 255, 255, 0.1) inset;
+            width: 800px;
+            max-width: 90%;
             text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        form:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.15) inset;
+            transform: translateY(-5px);
+        }
+
+        form h2 {
+            margin-bottom: 25px;
+            font-size: 28px;
+            background: linear-gradient(to right, #ffffff, #e0e0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Upload Container Styling */
+        .upload-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .upload-box {
+            flex: 1;
+            min-width: 280px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .upload-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .upload-box:hover::before {
+            opacity: 1;
+        }
+
+        .image-preview {
+            margin-top: 20px;
+            min-height: 180px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .image-preview:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .preview-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .image-preview img:hover {
+            transform: scale(1.03);
+        }
+
+        /* File upload progress bar */
+        .upload-progress {
+            height: 4px;
+            width: 0%;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: width 0.3s ease;
+            border-radius: 0 4px 4px 0;
         }
 
         label {
             display: block;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             color: #fff;
             margin-top: 10px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        label::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(to right, rgba(255,255,255,0.8), rgba(255,255,255,0));
+            bottom: -4px;
+            left: 0;
+            border-radius: 2px;
+        }
+
+        /* Custom file input styling */
+        .file-input-container {
+            position: relative;
+            margin: 15px 0;
         }
 
         input[type="file"] {
-            width: 100%;
-            padding: 8px;
-            margin: 10px 0;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            cursor: pointer;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.2);
             color: white;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0;
+            width: 100%;
+        }
+
+        .file-input-label:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .file-input-label:active {
+            transform: translateY(0);
+        }
+
+        .file-input-label::before {
+            content: '📁';
+            margin-right: 10px;
+            font-size: 18px;
         }
 
         input[type="submit"] {
-            background: linear-gradient(to right, #28a745, #28d745);
+            background: linear-gradient(45deg, #11998e, #38ef7d);
             border: none;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            padding: 12px;
-            border-radius: 6px;
+            padding: 14px 20px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: 0.3s ease-in-out;
+            transition: all 0.3s ease;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 20px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        input[type="submit"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
         }
 
         input[type="submit"]:hover {
-            transform: scale(1.05);
-            background: linear-gradient(to right, #1e8f3a, #1ecf3a);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(56, 239, 125, 0.4);
+            background: linear-gradient(45deg, #0d8b82, #32d873);
+        }
+
+        input[type="submit"]:hover::before {
+            left: 100%;
+        }
+
+        input[type="submit"]:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(56, 239, 125, 0.3);
         }
 
         /* Result Styling */
         h3 {
             color: white;
-            margin-top: 10px;
+            margin-top: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
         h3 span {
             font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, #11998e, #38ef7d);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 10px;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.real {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .status-badge.fake {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .status-badge.waiting {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .status-badge::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-badge.real::before {
+            background-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .status-badge.fake::before {
+            background-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .status-badge.waiting::before {
+            background-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Image Display Styling */
+        .image-display {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            margin-top: 30px;
+            margin-bottom: 50px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 255, 255, 0.1) inset;
+            width: 80%;
+            max-width: 900px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            pointer-events: none;
+        }
+
+        .image-display:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.15) inset;
+        }
+
+        .image-display h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ffffff, #e0e0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .image-comparison {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            gap: 20px;
+        }
+
+        .image-box {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .image-box h4 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 18px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .image-box h4::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, rgba(255,255,255,0.8), rgba(255,255,255,0));
+            border-radius: 2px;
+        }
+
+        .analysis-results {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .analysis-results::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, #4facfe, #00f2fe);
+        }
+
+        .analysis-results h4 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .score-explanation {
+            color: #ddd;
+            font-size: 14px;
+            margin-top: 8px;
+            line-height: 1.5;
         }
 
     </style>
@@ -180,7 +623,7 @@
                     <a href="/logout" class="logout-btn">Logout</a>
                 </div>
             </div>
-        </div>        
+        </div>
     </nav>
 
     <!-- Flash Messages -->
@@ -196,31 +639,61 @@
 
     <form action="/upload" method="post" enctype="multipart/form-data">
         <h2 style="color: white;">Upload Images for Verification</h2>
-        
-        <label for="fake_image">Upload Fake Image:</label>
-        <input type="file" name="fake_image" required>
-    
-        <label for="original_image">Upload Original Image:</label>
-        <input type="file" name="original_image" required>
-    
-        <h3>Result:
-            {% if status %} 
-                <span style="color: lightgreen">{{ status }}</span> 
+
+        <div class="upload-container">
+            <div class="upload-box">
+                <label for="fake_image">Upload Suspected Fake Image:</label>
+                <div class="file-input-container">
+                    <input type="file" name="fake_image" id="fake_image" accept="image/*" required>
+                    <label for="fake_image" class="file-input-label">Choose a file</label>
+                </div>
+                <div class="image-preview" id="fake-image-preview">
+                    <p class="preview-text">Image preview will appear here</p>
+                    <div class="upload-progress" id="fake-progress"></div>
+                </div>
+            </div>
+
+            <div class="upload-box">
+                <label for="original_image">Upload Original Image:</label>
+                <div class="file-input-container">
+                    <input type="file" name="original_image" id="original_image" accept="image/*" required>
+                    <label for="original_image" class="file-input-label">Choose a file</label>
+                </div>
+                <div class="image-preview" id="original-image-preview">
+                    <p class="preview-text">Image preview will appear here</p>
+                    <div class="upload-progress" id="original-progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-container">
+            <h3>Verification Result:</h3>
+            {% if status %}
+                <div class="status-badge {% if status == 'Real' %}real{% else %}fake{% endif %}">
+                    {{ status }}
+                </div>
             {% elif err %}
-                <span style="color: red">{{ err }}</span>
+                <div class="status-badge fake">{{ err }}</div>
             {% else %}
-                <span style="color: lightblue">Awaiting Results</span>
+                <div class="status-badge waiting">Awaiting Results</div>
             {% endif %}
-        </h3>
-    
-        <h3 style="color: red;">{{ error }}</h3>
-    
-        <input type="submit" value="Verify Images">
-    </form>        
+
+            {% if error %}
+                <p style="color: #ff4b5c; margin-top: 10px;">{{ error }}</p>
+            {% endif %}
+        </div>
+
+        <div class="loading" id="loading-animation">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Processing images, please wait...</p>
+        </div>
+
+        <input type="submit" value="Verify Images" id="submit-button">
+    </form>
 
     <script>
-        // Show flash messages for 3 seconds
         document.addEventListener("DOMContentLoaded", function () {
+            // Show flash messages for 3 seconds
             const flashMessages = document.querySelector(".flash-messages");
             if (flashMessages) {
                 flashMessages.style.display = "block";
@@ -228,8 +701,172 @@
                     flashMessages.style.display = "none";
                 }, 3000);
             }
+
+            // Image preview functionality with progress bar
+            function handleImagePreview(inputId, previewId, progressId) {
+                const input = document.getElementById(inputId);
+                const preview = document.getElementById(previewId);
+                const progress = document.getElementById(progressId);
+                const fileLabel = input.nextElementSibling; // The label element
+
+                input.addEventListener('change', function() {
+                    // Update label text with filename
+                    if (this.files && this.files[0]) {
+                        const fileName = this.files[0].name;
+                        fileLabel.textContent = fileName.length > 20 ?
+                            fileName.substring(0, 17) + '...' : fileName;
+                    } else {
+                        fileLabel.textContent = 'Choose a file';
+                    }
+
+                    // Clear previous preview
+                    preview.innerHTML = '';
+                    // Add back the progress bar that was removed
+                    preview.appendChild(progress);
+
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+
+                        // Show progress during load
+                        reader.onprogress = function(e) {
+                            if (e.lengthComputable) {
+                                const percentLoaded = Math.round((e.loaded / e.total) * 100);
+                                progress.style.width = percentLoaded + '%';
+                            }
+                        };
+
+                        reader.onload = function(e) {
+                            // Create and add image
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            preview.appendChild(img);
+
+                            // Complete progress bar
+                            progress.style.width = '100%';
+
+                            // Hide progress bar after a delay
+                            setTimeout(() => {
+                                progress.style.width = '0%';
+                            }, 1000);
+                        };
+
+                        reader.readAsDataURL(this.files[0]);
+                    } else {
+                        // No file selected, show placeholder text
+                        const text = document.createElement('p');
+                        text.className = 'preview-text';
+                        text.textContent = 'Image preview will appear here';
+                        preview.appendChild(text);
+                    }
+                });
+            }
+
+            // Initialize image previews
+            handleImagePreview('fake_image', 'fake-image-preview', 'fake-progress');
+            handleImagePreview('original_image', 'original-image-preview', 'original-progress');
+
+            // Form submission handling with loading animation
+            const form = document.querySelector('form');
+            const loadingAnimation = document.getElementById('loading-animation');
+            const submitButton = document.getElementById('submit-button');
+
+            form.addEventListener('submit', function(e) {
+                // Only show loading if both files are selected
+                const fakeImage = document.getElementById('fake_image').files[0];
+                const originalImage = document.getElementById('original_image').files[0];
+
+                if (fakeImage && originalImage) {
+                    // Show loading animation
+                    loadingAnimation.style.display = 'block';
+                    submitButton.disabled = true;
+                    submitButton.value = 'Processing...';
+                }
+            });
         });
     </script>
+
+    <!-- Image Display Section -->
+    {% if fake_image_path and original_image_path %}
+    <div class="image-display">
+        <div class="image-container">
+            <h3>Analysis Results</h3>
+            <div class="image-comparison">
+                <div class="image-box">
+                    <h4>Suspected Fake Image</h4>
+                    <img src="{{ fake_image_path }}" alt="Suspected Fake Image" onclick="this.classList.toggle('zoomed')">
+                    <p style="color: #ddd; margin-top: 10px; font-size: 13px;">Click image to zoom</p>
+                </div>
+                <div class="image-box">
+                    <h4>Original Reference Image</h4>
+                    <img src="{{ original_image_path }}" alt="Original Image" onclick="this.classList.toggle('zoomed')">
+                    <p style="color: #ddd; margin-top: 10px; font-size: 13px;">Click image to zoom</p>
+                </div>
+            </div>
+
+            {% if ssim_score is defined %}
+            <div class="analysis-results">
+                <h4>Verification Details</h4>
+                <div class="metrics-container">
+                    <div class="metric">
+                        <span class="metric-name">Image Similarity Score:</span>
+                        <span class="metric-value" style="color: {% if ssim_score >= 0.5 %}#38ef7d{% else %}#ff4b5c{% endif %};">{{ ssim_score|round(2) }}</span>
+                    </div>
+                    <p class="score-explanation">Higher score indicates greater similarity between images. A score below 0.5 suggests potential forgery.</p>
+
+                    <div class="metric">
+                        <span class="metric-name">Final Verdict:</span>
+                        <div class="status-badge {% if status == 'Real' %}real{% else %}fake{% endif %}" style="margin-left: 10px;">
+                            {{ status }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <style>
+        /* Add zoom functionality */
+        .image-box img.zoomed {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(2);
+            max-height: 80vh;
+            max-width: 80vw;
+            z-index: 1000;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        }
+
+        .metrics-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .metric {
+            display: flex;
+            align-items: center;
+        }
+
+        .metric-name {
+            font-weight: 600;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+
+    <!-- Add a footer -->
+    <footer style="text-align: center; padding: 20px; margin-top: auto; color: rgba(255,255,255,0.7); font-size: 14px;">
+        <p>Image Forgery Detection System &copy; 2023</p>
+        <p>Powered by Deep Learning Technology</p>
+    </footer>
 
 </body>
 </html>
