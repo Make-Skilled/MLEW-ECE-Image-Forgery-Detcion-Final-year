@@ -491,13 +491,13 @@
         .image-display {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
-            padding: 30px;
+            padding: 25px;
             margin-top: 30px;
             margin-bottom: 50px;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 255, 255, 0.1) inset;
             width: 80%;
-            max-width: 900px;
+            max-width: 800px;
             text-align: center;
             transition: all 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -533,17 +533,21 @@
 
         .image-comparison {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             flex-wrap: wrap;
             margin-top: 20px;
-            gap: 20px;
+            gap: 15px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .image-box {
             flex: 1;
-            min-width: 300px;
+            min-width: 250px;
+            max-width: 300px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
             transition: all 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -574,6 +578,20 @@
             height: 2px;
             background: linear-gradient(to right, rgba(255,255,255,0.8), rgba(255,255,255,0));
             border-radius: 2px;
+        }
+
+        .image-box img {
+            max-width: 100%;
+            max-height: 150px; /* Smaller size for images */
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            object-fit: contain;
+        }
+
+        .image-box img:hover {
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .analysis-results {
@@ -793,13 +811,11 @@
             <div class="image-comparison">
                 <div class="image-box">
                     <h4>Suspected Fake Image</h4>
-                    <img src="{{ fake_image_path }}" alt="Suspected Fake Image" onclick="this.classList.toggle('zoomed')">
-                    <p style="color: #ddd; margin-top: 10px; font-size: 13px;">Click image to zoom</p>
+                    <img src="{{ fake_image_path }}" alt="Suspected Fake Image">
                 </div>
                 <div class="image-box">
                     <h4>Original Reference Image</h4>
-                    <img src="{{ original_image_path }}" alt="Original Image" onclick="this.classList.toggle('zoomed')">
-                    <p style="color: #ddd; margin-top: 10px; font-size: 13px;">Click image to zoom</p>
+                    <img src="{{ original_image_path }}" alt="Original Image">
                 </div>
             </div>
 
@@ -811,9 +827,47 @@
                         <span class="metric-name">Image Similarity Score:</span>
                         <span class="metric-value" style="color: {% if ssim_score >= 0.5 %}#38ef7d{% else %}#ff4b5c{% endif %};">{{ ssim_score|round(2) }}</span>
                     </div>
+
+                    <!-- Similarity Gauge -->
+                    <div class="similarity-gauge-container">
+                        <div class="similarity-gauge">
+                            <div class="similarity-fill" style="width: {{ (ssim_score * 100)|round }}%;
+                                 background: linear-gradient(to right,
+                                    {% if ssim_score < 0.3 %}#ff4b2b, #ff416c{% elif ssim_score < 0.5 %}#ff9966, #ff5e62{% elif ssim_score < 0.7 %}#ffeb3b, #4facfe{% else %}#11998e, #38ef7d{% endif %});"></div>
+                            <div class="similarity-markers">
+                                <span>0</span>
+                                <span>0.25</span>
+                                <span>0.5</span>
+                                <span>0.75</span>
+                                <span>1.0</span>
+                            </div>
+                        </div>
+                        <div class="similarity-percentage">
+                            <span>{{ match_percentage|round|int }}% Match</span>
+                        </div>
+                    </div>
+
+                    <div class="detailed-metrics">
+                        <div class="metric-card">
+                            <div class="metric-icon match-icon"></div>
+                            <div class="metric-details">
+                                <span class="metric-title">Match Percentage</span>
+                                <span class="metric-value-large">{{ match_percentage|round|int }}%</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon confidence-icon {{ confidence_class }}"></div>
+                            <div class="metric-details">
+                                <span class="metric-title">Confidence Level</span>
+                                <span class="metric-value-large {{ confidence_class }}">{{ confidence }}</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <p class="score-explanation">Higher score indicates greater similarity between images. A score below 0.5 suggests potential forgery.</p>
 
-                    <div class="metric">
+                    <div class="metric verdict-metric">
                         <span class="metric-name">Final Verdict:</span>
                         <div class="status-badge {% if status == 'Real' %}real{% else %}fake{% endif %}" style="margin-left: 10px;">
                             {{ status }}
@@ -827,18 +881,6 @@
     {% endif %}
 
     <style>
-        /* Add zoom functionality */
-        .image-box img.zoomed {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(2);
-            max-height: 80vh;
-            max-width: 80vw;
-            z-index: 1000;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-        }
-
         .metrics-container {
             display: flex;
             flex-direction: column;
@@ -859,6 +901,187 @@
         .metric-value {
             font-weight: bold;
             font-size: 18px;
+        }
+
+        /* Similarity Gauge Styling */
+        .similarity-gauge-container {
+            margin: 15px 0;
+            width: 100%;
+        }
+
+        .similarity-gauge {
+            height: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 5px;
+        }
+
+        .similarity-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+            position: relative;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .similarity-markers {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+            margin-top: 5px;
+        }
+
+        .similarity-markers span {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .similarity-percentage {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .similarity-percentage span {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Detailed Metrics Styling */
+        .detailed-metrics {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .match-icon {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+        }
+
+        .match-icon::before {
+            content: '%';
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .confidence-icon {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .confidence-icon::before {
+            content: '!';
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .confidence-icon.very-high {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            box-shadow: 0 0 10px rgba(56, 239, 125, 0.5);
+        }
+
+        .confidence-icon.high {
+            background: linear-gradient(45deg, #56ab2f, #a8e063);
+            box-shadow: 0 0 10px rgba(168, 224, 99, 0.5);
+        }
+
+        .confidence-icon.medium {
+            background: linear-gradient(45deg, #ffeb3b, #ffc107);
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+
+        .confidence-icon.low {
+            background: linear-gradient(45deg, #ff9966, #ff5e62);
+            box-shadow: 0 0 10px rgba(255, 94, 98, 0.5);
+        }
+
+        .confidence-icon.very-low {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            box-shadow: 0 0 10px rgba(255, 65, 108, 0.5);
+        }
+
+        .metric-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .metric-value-large {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .metric-value-large.very-high {
+            color: #38ef7d;
+        }
+
+        .metric-value-large.high {
+            color: #a8e063;
+        }
+
+        .metric-value-large.medium {
+            color: #ffc107;
+        }
+
+        .metric-value-large.low {
+            color: #ff5e62;
+        }
+
+        .metric-value-large.very-low {
+            color: #ff416c;
+        }
+
+        .verdict-metric {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, Response
+from flask import Flask, render_template, request, redirect, url_for, session, Response, send_from_directory
 from pymongo import MongoClient
 from deepface import DeepFace
 import cv2
@@ -11,7 +11,7 @@ from skimage.metrics import structural_similarity as ssim  # SSIM for strict com
 from model import DeepFakeDetector  # Import your deepfake detection model
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='uploads', static_url_path='/uploads')
 app.secret_key = '123'
 
 # MongoDB setup
@@ -39,10 +39,10 @@ def compute_ssim(img1_path, img2_path):
     """Compute SSIM score between two images to check similarity"""
     img1 = cv2.imread(img1_path, cv2.IMREAD_GRAYSCALE)
     img2 = cv2.imread(img2_path, cv2.IMREAD_GRAYSCALE)
-    
+
     # Resize to same shape if needed
     img2 = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
-    
+
     # Compute SSIM
     score, _ = ssim(img1, img2, full=True)
     return score
@@ -69,10 +69,10 @@ def reg():
 def register():
     username = request.form['username']
     password = request.form['password']
-    
+
     if users.find_one({"username": username}):
         return render_template('login.html', status="Username already exists")
-    
+
     users.insert_one({"username": username, "password": password})
     return render_template('signup.html', status="Registration successful")
 
@@ -81,15 +81,21 @@ def upload():
     if request.method == 'POST':
         if 'fake_image' not in request.files or 'original_image' not in request.files:
             return render_template('index.html', error="Please select two files to upload.")
-        
+
         file1 = request.files['fake_image']
         file2 = request.files['original_image']
 
         if file1.filename == '' or file2.filename == '':
             return render_template('index.html', error="Please select two valid files to upload.")
 
-        fake_path = os.path.join("uploads", file1.filename)
-        original_path = os.path.join("uploads", file2.filename)
+        # Get absolute path to uploads directory
+        uploads_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+
+        # Create full paths for the files
+        fake_path = os.path.join(uploads_dir, file1.filename)
+        original_path = os.path.join(uploads_dir, file2.filename)
+
+        # Save the files
         file1.save(fake_path)
         file2.save(original_path)
 
@@ -112,7 +118,40 @@ def upload():
         else:
             status = "Fake"
 
-        return render_template('index.html', username=session['username'], status=status, ssim_score=ssim_score)
+        # Create URLs for the images to display them
+        fake_image_path = f"/uploads/{file1.filename}"
+        original_image_path = f"/uploads/{file2.filename}"
+
+        # Calculate additional metrics for detailed comparison
+        # Normalized SSIM score as percentage
+        match_percentage = ssim_score * 100
+
+        # Determine confidence level based on SSIM score
+        if ssim_score >= 0.8:
+            confidence = "Very High"
+            confidence_class = "very-high"
+        elif ssim_score >= 0.6:
+            confidence = "High"
+            confidence_class = "high"
+        elif ssim_score >= 0.4:
+            confidence = "Medium"
+            confidence_class = "medium"
+        elif ssim_score >= 0.2:
+            confidence = "Low"
+            confidence_class = "low"
+        else:
+            confidence = "Very Low"
+            confidence_class = "very-low"
+
+        return render_template('index.html',
+                              username=session['username'],
+                              status=status,
+                              ssim_score=ssim_score,
+                              match_percentage=match_percentage,
+                              confidence=confidence,
+                              confidence_class=confidence_class,
+                              fake_image_path=fake_image_path,
+                              original_image_path=original_image_path)
 
     return render_template('index.html')
 
@@ -122,10 +161,10 @@ def generate_frames():
         success, frame = cap.read()
         if not success:
             break
-        
+
         # Process frame for deepfake detection (dummy logic, replace with real model)
         # Here, we could run frame through deepfake_model
-        
+
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -134,12 +173,22 @@ def generate_frames():
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory('uploads', filename)
+
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    if not os.path.exists("uploads"):
-        os.makedirs("uploads")
+    # Ensure uploads directory exists with proper permissions
+    uploads_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+    if not os.path.exists(uploads_dir):
+        os.makedirs(uploads_dir)
+
+    # Make sure the directory is accessible
+    os.chmod(uploads_dir, 0o755)
+
     app.run(port=5001, debug=True)
